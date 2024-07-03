@@ -1,0 +1,43 @@
+syntax="proto3";
+
+
+option go_package="/genproto";
+
+
+package protos;
+
+import "common.proto";
+
+
+message DiscoveryResponse{
+      string compositionId=1;
+      string  genre=2;
+       repeated string tags=3;
+       int64  listenCount=4;
+       int64  likeCount=5;
+}
+message  DiscoveriesResponse{
+  repeated DiscoveryResponse discoveries=4;
+}
+message  GetGenre{
+    string  genre=1;
+}
+message  GetDiscoveryRequest{
+  string compositionId=1;
+  string  genre=2;
+  repeated string tags=3;
+  int64  listenCount=4;
+  int64  likeCount=5;
+  Filter limitOffset=6;
+}
+message  LikeRequest{
+  string  compositionId=1;
+}
+service  DiscoveryService{
+    rpc GetCompositionTrending(Void)returns(DiscoveriesResponse);
+    rpc GetCompositionRecommend(Void)returns(DiscoveriesResponse);
+    rpc GetCompositionGenre(GetGenre)returns(DiscoveriesResponse);
+    rpc GetDiscovery(GetDiscoveryRequest)returns(DiscoveriesResponse);
+    rpc CreateCompositionLike(LikeRequest)returns(Void);
+  rpc DeleteCompositionLike(LikeRequest)returns(Void);
+}

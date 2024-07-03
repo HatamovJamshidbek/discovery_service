@@ -1,0 +1,76 @@
+syntax="proto3";
+
+option go_package="/genproto";
+
+
+package protos;
+import "common.proto";
+message CreateInviteRequest{
+   string  compositionId=1;
+   string  invertId=2;
+   string  inviteeId=3;
+   string  status=4;
+
+}
+message UpdateInviteRequest{
+   string  Id=1;
+   string  compositionId=2;
+   string  invertId=3;
+   string  inviteeId=4;
+   string  status=5;
+
+}
+message CollaborationResponse{
+    string compositionId=1;
+    string userid=2;
+    string role=3;
+}
+message CollaborationsResponse{
+   repeated CollaborationResponse collaborations=1;
+}
+message  UpdateCollaborationRequest{
+  string  id=1;
+    string compositionId=2;
+    string userid=3;
+    string  role=4;
+}
+message  DeleteCollaborationRequest{
+   string compositionId=1;
+   string userid=2;
+}
+message CreateCommitRequest{
+   string compositionId=1;
+   string userId=2;
+   string content=3;
+}
+message CommitResponse{
+   string compositionId=2;
+   string userId=3;
+   string content=4;
+}
+message CommitsResponse{
+   repeated CommitResponse commitsResponse=1;
+}
+message  GetCommitRequest{
+   string compositionId=2;
+   string userId=3;
+   string content=4;
+   Filter limitOffset=5;
+
+}
+message  GetCollaboratorsRequest{
+   string  CompositionId=1;
+   string userId=2;
+   string Role=3;
+   Filter limitOffset=4;
+}
+service  CollaborationService{
+  rpc CreateInvite(CreateInviteRequest)returns(Void);
+  rpc UpdateInvite(UpdateInviteRequest)returns(Void);
+  rpc GetCollaborators(GetCollaboratorsRequest)returns(CollaborationsResponse);
+  rpc UpdateCollaborators(UpdateCollaborationRequest)returns(Void);
+  rpc DeleteCollaborators(DeleteCollaborationRequest)returns(Void);
+  rpc CreateComment(CreateCommitRequest)returns(Void);
+  rpc GetComment(GetCommitRequest)returns(CommitsResponse);
+
+}

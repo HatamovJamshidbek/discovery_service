@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	pb "discovery_servcie/genproto"
 	strorage "discovery_servcie/help"
-	"discovery_servcie/models"
 	"github.com/lib/pq"
 )
 
@@ -39,7 +39,7 @@ func NewCompositionRepository(db *sql.DB) *CompositionRepository {
 //	func (repo *CompositionRepository) DeleteCompositionMetadata(id int) (interface{}, error) {
 //		return repo.Db.Exec("update  composition_metadata set deleted_at=$1 WHERE composition_id = $2", id, time.Now())
 //	}
-func (repo *CompositionRepository) GetCompositionMetadata(filter *models.CompositionMetadata) (*[]models.CompositionMetadata, error) {
+func (repo *CompositionRepository) GetCompositionMetadata(filter *pb.GetDiscovery) (*pb.DiscoveriesResponse, error) {
 	var (
 		params = make(map[string]interface{})
 		arr    []interface{}
@@ -65,16 +65,16 @@ func (repo *CompositionRepository) GetCompositionMetadata(filter *models.Composi
 		queryFilter += " AND like_count = :like_count"
 	}
 
-	if filter.Limit > 0 {
-		params["limit"] = filter.Limit
+	if filter.LimitOffset.Limit > 0 {
+		params["limit"] = filter.LimitOffset.Limit
 		limit = ` LIMIT :limit`
 	}
-	if filter.Offset > 0 {
-		params["offset"] = filter.Offset
+	if filter.LimitOffset.Offset > 0 {
+		params["offset"] = filter.LimitOffset.Offset
 		offset = ` OFFSET :offset`
 	}
 
-	query := "SELECT composition_id, genre, tags, listen_count, like_count FROM composition_metadatas WHERE delted_at is null "
+	query := "SELECT composition_id, genre, tags, listen_count, like_count FROM composition_meta_datas WHERE delted_at is null "
 	query = query + queryFilter + limit + offset
 
 	query, arr = strorage.ReplaceQueryParams(query, params)
@@ -84,39 +84,81 @@ func (repo *CompositionRepository) GetCompositionMetadata(filter *models.Composi
 	}
 	defer rows.Close()
 
-	var compositions []models.CompositionMetadata
+	var compositions []*pb.DiscoveryResponse
 	for rows.Next() {
-		var metadata models.CompositionMetadata
-		err := rows.Scan(&metadata.CompositionID, &metadata.Genre, pq.Array(&metadata.Tags), &metadata.ListenCount, &metadata.LikeCount)
+		var metadata pb.DiscoveryResponse
+		err := rows.Scan(&metadata.CompositionId, &metadata.Genre, pq.Array(&metadata.Tags), &metadata.ListenCount, &metadata.LikeCount)
 		if err != nil {
 			return nil, err
 		}
-		compositions = append(compositions, metadata)
+		compositions = append(compositions, &metadata)
 	}
 
-	return &compositions, nil
+	return &pb.DiscoveriesResponse{Discoveries: compositions}, nil
 }
 
-func (repo *CompositionRepository) GetCompositionTrending(filter *models.CompositionMetadata) (*[]models.CompositionMetadata, error) {
+func (repo *CompositionRepository) GetCompositionTrending(void *pb.Void) (*pb.DiscoveriesResponse, error) {
 	rows, err := repo.Db.Query("SELECT   composition_id, genre, tags, listen_count, like_count  from composition_meta_datas where like_count = (SELECT MAX(like_count) FROM composition_meta_datas)")
 	if err != nil {
 		return nil, err
 	}
-	var compositions []models.CompositionMetadata
+	var compositions []*pb.DiscoveryResponse
 	for rows.Next() {
-		var metadata models.CompositionMetadata
-		err := rows.Scan(&metadata.CompositionID, &metadata.Genre, pq.Array(&metadata.Tags), &metadata.ListenCount, &metadata.LikeCount)
+		var metadata pb.DiscoveryResponse
+		err := rows.Scan(&metadata.CompositionId, &metadata.Genre, pq.Array(&metadata.Tags), &metadata.ListenCount, &metadata.LikeCount)
 		if err != nil {
 			return nil, err
 		}
-		compositions = append(compositions, metadata)
+		compositions = append(compositions, &metadata)
 	}
 
-	return &compositions, nil
+	return &pb.DiscoveriesResponse{Discoveries: compositions}, nil
 }
-func (repo *CompositionRepository) DeleteCompositionLike(compositionId int) (interface{}, error) {
-	return repo.Db.Exec("update composition_meta_datas set like_count=like_count-1 where composition_id=$1 ", compositionId)
+func (repo *CompositionRepository) GetCompositionRecommend(void *pb.Void) (*pb.DiscoveriesResponse, error) {
+	rows, err := repo.Db.Query("SELECT   composition_id, genre, tags, listen_count, like_count  composition_meta_datas order by  desc listen_count")
+	if err != nil {
+		return nil, err
+	}
+	var compositions []*pb.DiscoveryResponse
+	for rows.Next() {
+		var metadata pb.DiscoveryResponse
+		err := rows.Scan(&metadata.CompositionId, &metadata.Genre, pq.Array(&metadata.Tags), &metadata.ListenCount, &metadata.LikeCount)
+		if err != nil {
+			return nil, err
+		}
+		compositions = append(compositions, &metadata)
+	}
+
+	return &pb.DiscoveriesResponse{Discoveries: compositions}, nil
 }
-func (repo *CompositionRepository) CreateCompositionLike(compositionId int) (interface{}, error) {
-	return repo.Db.Exec("update composition_meta_datas set like_count=like_count+1 where composition_id=$1 ", compositionId)
+func (repo *CompositionRepository) GetCompositionGenre(genre *pb.GetGenre) (*pb.DiscoveriesResponse, error) {
+	rows, err := repo.Db.Query("select composition_id,genre from composition_meta_datas where genre=$1", genre)
+	if err != nil {
+		return nil, err
+	}
+	var compositions []*pb.DiscoveryResponse
+	for rows.Next() {
+		var metadata pb.DiscoveryResponse
+		err := rows.Scan(&metadata.CompositionId, &metadata.Genre, pq.Array(&metadata.Tags), &metadata.ListenCount, &metadata.LikeCount)
+		if err != nil {
+			return nil, err
+		}
+		compositions = append(compositions, &metadata)
+	}
+
+	return &pb.DiscoveriesResponse{Discoveries: compositions}, nil
+}
+func (repo *CompositionRepository) DeleteCompositionLike(compositionId *pb.LikeRequest) (*pb.Void, error) {
+	_, err := repo.Db.Exec("update composition_meta_datas set like_count=like_count-1 where composition_id=$1 ", compositionId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Void{}, nil
+}
+func (repo *CompositionRepository) CreateCompositionLike(compositionId *pb.LikeRequest) (*pb.Void, error) {
+	_, err := repo.Db.Exec("update composition_meta_datas set like_count=like_count+1 where composition_id=$1 ", compositionId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Void{}, nil
 }

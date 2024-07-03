@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	HTTPPort string
+	CompositionMetaDataPort string
 
 	PostgresHost     string
 	PostgresPort     int
@@ -26,13 +26,13 @@ func Load() Config {
 
 	config := Config{}
 
-	config.HTTPPort = cast.ToString(coalesce("HTTP_PORT", ":8088"))
+	config.CompositionMetaDataPort = cast.ToString(coalesce("COMPOSITION_META_DATA_PORT", ":8084"))
 
 	config.PostgresHost = cast.ToString(coalesce("DB_HOST", "localhost"))
 	config.PostgresPort = cast.ToInt(coalesce("DB_PORT", 5433))
 	config.PostgresUser = cast.ToString(coalesce("DB_USER", "postgres"))
 	config.PostgresPassword = cast.ToString(coalesce("DB_PASSWORD", "1111"))
-	config.PostgresDatabase = cast.ToString(coalesce("DB_NAME", "gollang"))
+	config.PostgresDatabase = cast.ToString(coalesce("DB_NAME", "composition_meta_datas"))
 
 	config.LOG_PATH = cast.ToString(coalesce("LOG_PATH", "logs/info.log"))
 

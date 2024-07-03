@@ -1,0 +1,77 @@
+syntax="proto3";
+
+
+option  go_package="/genproto";
+
+package  protos;
+
+import "common.proto";
+message CreateCompositionRequest{
+   string  userId =1;
+   string title =2;
+   string description=3;
+   string  status=4;
+}
+message UpdateCompositionRequest{
+  string  Id=1;
+  string  userId =2;
+  string title =3;
+  string description=4;
+  string  status=5;
+}
+message  CompositionResponse{
+  string  id=1;
+  string  userId =2;
+  string title =3;
+  string description=4;
+  string  status=5;
+
+}
+message CompositionsResponse{
+  repeated CompositionResponse compositionsResponse=1;
+}
+message  CreateTrackRequest{
+    string  compositionId=1;
+    string userId=2;
+    string title=3;
+    string  fileUrl=4;
+}
+
+message TrackResponse{
+    string  compositionId=1;
+    string userid=2;
+    string title=3;
+    string  fileUrl=4;
+}
+message  TracksResponse{
+  repeated  TrackResponse tracksResponse=1;
+}
+message UpdateTrackRequest{
+  string id=1;
+  string  compositionId=2;
+  string userid=3;
+  string title=4;
+  string  fileUrl=5;
+}
+message  GetTrackRequest{
+  string  compositionId=2;
+  string userid=3;
+  string title=4;
+  string  fileUrl=5;
+  Filter limitOffset=6;
+}
+message  DeleteTrackRequest{
+    string compositionId=1;
+    string  trackId=2;
+}
+service CompositionService{
+   rpc CreateComposition(CreateCompositionRequest)returns(Void);
+   rpc UpdateComposition(UpdateCompositionRequest)returns(Void);
+   rpc DeleteComposition(IdRequest)returns(Void);
+  rpc GetCompositionByUserid(IdRequest)returns(CompositionsResponse);
+  rpc GetCompositionById(IdRequest)returns(CompositionResponse);
+  rpc CreateTrack(CreateTrackRequest)returns(Void);
+  rpc GetTrack(GetTrackRequest)returns(TracksResponse);
+  rpc UpdateTrack(UpdateTrackRequest)returns(Void);
+  rpc DeleteTrack(DeleteTrackRequest)returns(Void);
+}
