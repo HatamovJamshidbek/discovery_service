@@ -5,6 +5,7 @@ import (
 	pb "discovery_servcie/genproto"
 	"discovery_servcie/service"
 	"discovery_servcie/storage/postgres"
+	"fmt"
 	"google.golang.org/grpc"
 	_ "google.golang.org/grpc"
 	"log"
@@ -15,6 +16,7 @@ func main() {
 	cnf := config.Config{}
 	db, err := postgres.ConnectionDb(&cnf)
 	if err != nil {
+		fmt.Println("++++++++++++", err)
 		log.Fatalf("error:->%s", err.Error())
 	}
 	listen, err := net.Listen("tcp", ":8084")
@@ -22,7 +24,7 @@ func main() {
 		log.Fatalf("error:->%s", err.Error())
 	}
 	grpcServer := grpc.NewServer()
-	pb.RegisterDiscoveryServiceServer(grpcServer, service.NewDiscoveryService(postgres.NewCompositionRepository(db)))
+	pb.RegisterDiscoveryServiceServer(grpcServer, service.NewDiscoveryService(postgres.NewDiscoveryRepository(db)))
 	log.Printf("server listening at %v", listen.Addr())
 
 	if err := grpcServer.Serve(listen); err != nil {

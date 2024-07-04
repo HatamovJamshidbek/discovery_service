@@ -27,6 +27,7 @@ type DiscoveryServiceClient interface {
 	GetCompositionGenre(ctx context.Context, in *GetGenre, opts ...grpc.CallOption) (*DiscoveriesResponse, error)
 	GetDiscovery(ctx context.Context, in *GetDiscoveryRequest, opts ...grpc.CallOption) (*DiscoveriesResponse, error)
 	CreateCompositionLike(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*Void, error)
+	CreateCompositionListen(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*Void, error)
 	DeleteCompositionLike(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*Void, error)
 }
 
@@ -83,6 +84,15 @@ func (c *discoveryServiceClient) CreateCompositionLike(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *discoveryServiceClient) CreateCompositionListen(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/protos.DiscoveryService/CreateCompositionListen", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *discoveryServiceClient) DeleteCompositionLike(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
 	err := c.cc.Invoke(ctx, "/protos.DiscoveryService/DeleteCompositionLike", in, out, opts...)
@@ -101,6 +111,7 @@ type DiscoveryServiceServer interface {
 	GetCompositionGenre(context.Context, *GetGenre) (*DiscoveriesResponse, error)
 	GetDiscovery(context.Context, *GetDiscoveryRequest) (*DiscoveriesResponse, error)
 	CreateCompositionLike(context.Context, *LikeRequest) (*Void, error)
+	CreateCompositionListen(context.Context, *LikeRequest) (*Void, error)
 	DeleteCompositionLike(context.Context, *LikeRequest) (*Void, error)
 	mustEmbedUnimplementedDiscoveryServiceServer()
 }
@@ -123,6 +134,9 @@ func (UnimplementedDiscoveryServiceServer) GetDiscovery(context.Context, *GetDis
 }
 func (UnimplementedDiscoveryServiceServer) CreateCompositionLike(context.Context, *LikeRequest) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCompositionLike not implemented")
+}
+func (UnimplementedDiscoveryServiceServer) CreateCompositionListen(context.Context, *LikeRequest) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCompositionListen not implemented")
 }
 func (UnimplementedDiscoveryServiceServer) DeleteCompositionLike(context.Context, *LikeRequest) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCompositionLike not implemented")
@@ -230,6 +244,24 @@ func _DiscoveryService_CreateCompositionLike_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DiscoveryService_CreateCompositionListen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DiscoveryServiceServer).CreateCompositionListen(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.DiscoveryService/CreateCompositionListen",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DiscoveryServiceServer).CreateCompositionListen(ctx, req.(*LikeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DiscoveryService_DeleteCompositionLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LikeRequest)
 	if err := dec(in); err != nil {
@@ -274,6 +306,10 @@ var DiscoveryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateCompositionLike",
 			Handler:    _DiscoveryService_CreateCompositionLike_Handler,
+		},
+		{
+			MethodName: "CreateCompositionListen",
+			Handler:    _DiscoveryService_CreateCompositionListen_Handler,
 		},
 		{
 			MethodName: "DeleteCompositionLike",
