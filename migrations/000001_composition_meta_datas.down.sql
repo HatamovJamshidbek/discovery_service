@@ -1,1 +1,0 @@
-drop  table  composition_meta_datas
